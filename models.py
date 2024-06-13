@@ -20,7 +20,7 @@ Author:  Hamdi Altaheri
 import tensorflow as tf
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, AveragePooling2D, MaxPooling2D
-from tensorflow.keras.layers import Conv1D, Conv2D, SeparableConv2D, DepthwiseConv2D
+from tensorflow.keras.layers import Conv1D, Conv2D, SeparableConv2D, DepthwiseConv2D, GlobalAveragePooling2D, Reshape
 from tensorflow.keras.layers import BatchNormalization, LayerNormalization, Flatten 
 from tensorflow.keras.layers import Add, Concatenate, Lambda, Input, Permute
 from tensorflow.keras.regularizers import L2
@@ -189,6 +189,63 @@ def Conv_block_(input_layer, F1=4, kernLength=64, poolSize=8, D=2, in_chans=22,
     block3 = AveragePooling2D((poolSize,1),data_format='channels_last')(block3)
     block3 = Dropout(dropout)(block3)
     return block3
+
+
+def res_Conv_block_(input_layer, F1=4, kernLength=64, poolSize=8, D=2, in_chans=22,
+                weightDecay=0.009, maxNorm=0.6, dropout=0.25):
+    """ Conv_block with Residual Connection
+
+        Notes
+        -----
+        using different regularization methods.
+    """
+
+    F2 = F1 * D
+
+    # Block 1
+    block1 = Conv2D(F1, (kernLength, 1), padding='same', data_format='channels_last',
+                    kernel_regularizer=L2(weightDecay),
+                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                    use_bias=False)(input_layer)
+    block1 = BatchNormalization(axis=-1)(block1)
+
+    # Block 2
+    block2 = DepthwiseConv2D((1, in_chans), depth_multiplier=D, data_format='channels_last',
+                             depthwise_regularizer=L2(weightDecay),
+                             depthwise_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                             use_bias=False)(block1)
+    block2 = BatchNormalization(axis=-1)(block2)
+    block2 = Activation('elu')(block2)
+    block2 = AveragePooling2D((8, 1), data_format='channels_last')(block2)
+    block2 = Dropout(dropout)(block2)
+
+    # Block 3
+    block3 = Conv2D(F2, (16, 1), padding='same', data_format='channels_last',
+                    kernel_regularizer=L2(weightDecay),
+                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                    use_bias=False)(block2)
+    block3 = BatchNormalization(axis=-1)(block3)
+    block3 = Activation('elu')(block3)
+
+    block3 = AveragePooling2D((poolSize, 1), data_format='channels_last')(block3)
+    block3 = Dropout(dropout)(block3)
+
+    # Adjusting shortcut dimensions
+    shortcut = Conv2D(F2, (1, 1), padding='same', data_format='channels_last',
+                      kernel_regularizer=L2(weightDecay),
+                      kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                      use_bias=False)(input_layer)
+    shortcut = BatchNormalization(axis=-1)(shortcut)
+
+    # Applying Global Average Pooling to adjust dimensions
+    shortcut = GlobalAveragePooling2D(data_format='channels_last')(shortcut)
+    shortcut = Reshape((1, 1, F2))(shortcut)
+    shortcut = tf.tile(shortcut, [1, block3.shape[1], block3.shape[2], 1])
+
+    output_layer = Add()([block3, shortcut])
+    output_layer = Activation('elu')(output_layer)
+
+    return output_layer
 
 #%% Temporal convolutional (TC) block used in the ATCNet model
 def TCN_block(input_layer,input_dimension,depth,kernel_size,filters,dropout,activation='relu'):
