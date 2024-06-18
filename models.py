@@ -63,7 +63,7 @@ def ATCNet_(n_classes, in_chans = 22, in_samples = 1125, n_windows = 5, attentio
     numFilters = eegn_F1
     F2 = numFilters*eegn_D
 
-    block1 = Conv_block_(input_layer = input_2, F1 = eegn_F1, D = eegn_D, 
+    block1 = res_Conv_block_(input_layer = input_2, F1 = eegn_F1, D = eegn_D,
                         kernLength = eegn_kernelSize, poolSize = eegn_poolSize,
                         weightDecay = conv_weightDecay, maxNorm = conv_maxNorm,
                         in_chans = in_chans, dropout = eegn_dropout)
