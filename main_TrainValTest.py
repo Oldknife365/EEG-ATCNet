@@ -371,7 +371,7 @@ def getModel(model_name, dataset_conf, from_logits = False):
 #%%
 def run():
     # Define dataset parameters
-    dataset = 'HGD' # Options: 'BCI2a','HGD', 'CS2R'
+    dataset = 'BCI2a' # Options: 'BCI2a','HGD', 'CS2R'
     
     if dataset == 'BCI2a': 
         in_samples = 1125
@@ -379,7 +379,7 @@ def run():
         n_sub = 9
         n_classes = 4
         classes_labels = ['Left hand', 'Right hand','Foot','Tongue']
-        data_path = os.path.expanduser('~') + '/BCI Competition IV/BCI Competition IV-2a/BCI Competition IV 2a mat/'
+        data_path = 'dataset/bci4a/'
     elif dataset == 'HGD': 
         in_samples = 1125
         n_channels = 44
