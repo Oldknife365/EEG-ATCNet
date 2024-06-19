@@ -379,7 +379,7 @@ def run():
         n_sub = 9
         n_classes = 4
         classes_labels = ['Left hand', 'Right hand','Foot','Tongue']
-        data_path = 'dataset/bci4a/'
+        data_path = '/home/data/home/zhuhg/EEG-ATCNet/datasets/'
     elif dataset == 'HGD': 
         in_samples = 1125
         n_channels = 44
