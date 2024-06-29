@@ -329,16 +329,16 @@ def getModel(model_name, dataset_conf, from_logits = False):
             # Attention (AT) block parameter
             attention = 'mha', # Options: None, 'mha','mhla', 'cbam', 'se'
             # Convolutional (CV) block parameters
-            eegn_F1 = 16,
+            eegn_F1 = 8,
             eegn_D = 2, 
             eegn_kernelSize = 64,
             eegn_poolSize = 7,
-            eegn_dropout = 0.3,
+            eegn_dropout = 0.5,
             # Temporal convolutional (TC) block parameters
             tcn_depth = 2, 
             tcn_kernelSize = 4,
             tcn_filters = 32,
-            tcn_dropout = 0.3, 
+            tcn_dropout = 0.3,
             tcn_activation='elu',
             )     
     elif(model_name == 'TCNet_Fusion'):
@@ -379,7 +379,7 @@ def run():
         n_sub = 9
         n_classes = 4
         classes_labels = ['Left hand', 'Right hand','Foot','Tongue']
-        data_path = '/home/data/home/zhuhg/EEG-ATCNet/datasets/'
+        data_path = 'datasets/bci4a/'
     elif dataset == 'HGD': 
         in_samples = 1125
         n_channels = 44

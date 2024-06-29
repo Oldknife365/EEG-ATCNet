@@ -257,50 +257,37 @@ def nex_Conv_block_(input_layer, F1=4, kernLength=64, poolSize=4, D=2, in_chans=
         using  different regularization methods.
     """
 
-    F2 = F1 * D * 2
-    block1 = Conv2D(F1, (kernLength, 1), padding='same', data_format='channels_last',
-                    kernel_regularizer=L2(weightDecay),
-
-                    # In a Conv2D layer with data_format="channels_last", the weight tensor has shape
-                    # (rows, cols, input_depth, output_depth), set axis to [0, 1, 2] to constrain
-                    # the weights of each filter tensor of size (rows, cols, input_depth).
-                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
-                    use_bias=False)(input_layer)
+    F2 = F1 * D
+    block1 = Conv2D(F1, (1, kernLength), padding='same', data_format='channels_last', use_bias=False)(input_layer)
     block1 = BatchNormalization(axis=-1)(block1)  # bn_axis = -1 if data_format() == 'channels_last' else 1
     block1 = Activation('elu')(block1)
-    block1 = Conv2D(F2, (kernLength, 1), padding='same', data_format='channels_last',
-                    kernel_regularizer=L2(weightDecay),
-                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
-                    use_bias=False)(block1)
+    block1 = Conv2D(F1 * 4, (1, kernLength), padding='same', data_format='channels_last', use_bias=False)(block1)
     block1 = BatchNormalization(axis=-1)(block1)
 
-    block2 = DepthwiseConv2D((1, in_chans),
+    block2 = DepthwiseConv2D((in_chans, 1),
                              depth_multiplier=D,
                              data_format='channels_last',
-                             depthwise_regularizer=L2(weightDecay),
-                             depthwise_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                             depthwise_constraint=max_norm(1.),
                              use_bias=False)(block1)
     block2 = BatchNormalization(axis=-1)(block2)
     block2 = Activation('elu')(block2)
-    block2 = AveragePooling2D((4, 1), data_format='channels_last')(block2)
+    block2 = AveragePooling2D((1, 4), data_format='channels_last')(block2)
     block2 = Dropout(dropout)(block2)
 
-    block3 = Conv2D(F2, (16, 1),
+    block3 = Conv2D(F1 * 4, (1, 16),
                     data_format='channels_last',
-                    kernel_regularizer=L2(weightDecay),
-                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                    dilation_rate=(1, 2),
                     use_bias=False, padding='same')(block2)
     block3 = BatchNormalization(axis=-1)(block3)
     # block3 = Activation('elu')(block3)
 
-    block3 = Conv2D(F1, (16, 1),
+    block3 = Conv2D(F1, (1, 16),
                     data_format='channels_last',
-                    kernel_regularizer=L2(weightDecay),
-                    kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
+                    dilation_rate=(1, 4),
                     use_bias=False, padding='same')(block3)
     block3 = BatchNormalization(axis=-1)(block3)
     block3 = Activation('elu')(block3)
-    block3 = AveragePooling2D((poolSize, 1), data_format='channels_last')(block3)
+    block3 = AveragePooling2D((1, 4), data_format='channels_last')(block3)
     block3 = Dropout(dropout)(block3)
     return block3
 
