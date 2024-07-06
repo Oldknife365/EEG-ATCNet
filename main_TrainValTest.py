@@ -319,28 +319,30 @@ def getModel(model_name, dataset_conf, from_logits = False):
     # Select the model
     if(model_name == 'ATCNet'):
         # Train using the proposed ATCNet model: https://ieeexplore.ieee.org/document/9852687
-        model = models.ATCNet_( 
-            # Dataset parameters
-            n_classes = n_classes, 
-            in_chans = n_channels, 
-            in_samples = in_samples, 
-            # Sliding window (SW) parameter
-            n_windows = 5, 
-            # Attention (AT) block parameter
-            attention = 'mha', # Options: None, 'mha','mhla', 'cbam', 'se'
-            # Convolutional (CV) block parameters
-            eegn_F1 = 8,
-            eegn_D = 2, 
-            eegn_kernelSize = 64,
-            eegn_poolSize = 7,
-            eegn_dropout = 0.3,
-            # Temporal convolutional (TC) block parameters
-            tcn_depth = 2, 
-            tcn_kernelSize = 4,
-            tcn_filters = 32,
-            tcn_dropout = 0.3, 
-            tcn_activation='elu',
-            )     
+        if (model_name == 'ATCNet'):
+            # Train using the proposed ATCNet model: https://ieeexplore.ieee.org/document/9852687
+            model = models.ATCNet_(
+                # Dataset parameters
+                n_classes=n_classes,
+                in_chans=n_channels,
+                in_samples=in_samples,
+                # Sliding window (SW) parameter
+                n_windows=5,
+                # Attention (AT) block parameter
+                attention='mha',  # Options: None, 'mha','mhla', 'cbam', 'se'
+                # Convolutional (CV) block parameters
+                eegn_F1=16,
+                eegn_D=2,
+                eegn_kernelSize=64,
+                eegn_poolSize=7,
+                eegn_dropout=0.3,
+                # Temporal convolutional (TC) block parameters
+                tcn_depth=2,
+                tcn_kernelSize=4,
+                tcn_filters=32,
+                tcn_dropout=0.3,
+                tcn_activation='elu',
+            )
     elif(model_name == 'TCNet_Fusion'):
         # Train using TCNet_Fusion: https://doi.org/10.1016/j.bspc.2021.102826
         model = models.TCNet_Fusion(n_classes = n_classes, Chans=n_channels, Samples=in_samples)      
