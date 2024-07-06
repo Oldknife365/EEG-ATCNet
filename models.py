@@ -373,7 +373,7 @@ def nex_Conv_block_(input_layer, F1=4, kernLength=64, poolSize=8, D=2, in_chans=
                              use_bias=False)(block1)
     block2 = BatchNormalization(axis=-1)(block2)
     block2 = Activation('elu')(block2)
-    block2 = AveragePooling2D((4, 1), data_format='channels_last')(block2)
+    block2 = AveragePooling2D((8, 1), data_format='channels_last')(block2)
     block2 = Dropout(dropout)(block2)
 
     block3 = Conv2D(F1 * 4, (16, 1),
@@ -383,7 +383,7 @@ def nex_Conv_block_(input_layer, F1=4, kernLength=64, poolSize=8, D=2, in_chans=
                     use_bias=False, padding='same')(block2)
     block3 = BatchNormalization(axis=-1)(block3)
 
-    block3 = Conv2D(F1, (16, 1),
+    block3 = Conv2D(F1 * 4, (16, 1),
                     data_format='channels_last',
                     kernel_regularizer=L2(weightDecay),
                     kernel_constraint=max_norm(maxNorm, axis=[0, 1, 2]),
@@ -391,7 +391,7 @@ def nex_Conv_block_(input_layer, F1=4, kernLength=64, poolSize=8, D=2, in_chans=
     block3 = BatchNormalization(axis=-1)(block3)
     block3 = Activation('elu')(block3)
 
-    block3 = AveragePooling2D((4, 1), data_format='channels_last')(block3)
+    block3 = AveragePooling2D((poolSize, 1), data_format='channels_last')(block3)
     block3 = Dropout(dropout)(block3)
     return block3
 
